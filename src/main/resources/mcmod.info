@@ -1,0 +1,9 @@
+[
+{
+  "modid": "compressedtnt",
+  "name": "Compressed TNT",
+  "description": "Adds better TNT",
+  "mcversion": "${mcversion}",
+  "authorList": ["DialupKing"]
+}
+]
