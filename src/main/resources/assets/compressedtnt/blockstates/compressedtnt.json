@@ -1,0 +1,6 @@
+{
+    "variants": {
+        "explode=false": { "model": "minecraft:tnt" },
+        "explode=true": { "model": "minecraft:tnt" }
+    }
+}
