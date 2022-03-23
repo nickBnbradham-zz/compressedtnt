@@ -35,8 +35,8 @@ public final class BlockCompressedTNT extends BlockTNT {
 		setUnlocalizedName(id);
 		setRegistryName(id);
 		setCreativeTab(CommonProxy.CREATIVE_TAB);
-		dropDenom = 4 * level + 1;
-		explSize = 4 * (level + 1);
+		dropDenom = 9 * level * level + 1;
+		explSize = 9 * (level + 1);
 	}
 
 	@Override

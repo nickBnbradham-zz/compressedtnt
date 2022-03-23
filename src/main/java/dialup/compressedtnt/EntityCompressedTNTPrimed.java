@@ -1,5 +1,6 @@
 package dialup.compressedtnt;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityTNTPrimed;
@@ -18,11 +19,12 @@ final class EntityCompressedTNTPrimed extends EntityTNTPrimed {
 
 	private static final DataParameter<Integer> FUSE = EntityDataManager
 			.<Integer>createKey(EntityCompressedTNTPrimed.class, DataSerializers.VARINT);
+	private static final IBlockState AIR_STATE = Blocks.AIR.getDefaultState();
 
 	private final double explSize;
 	private final int dropD;
 
-	private int fuse;
+	private int fuse, startX, stopX, startY, stopY, startZ, stopZ;
 
 	public EntityCompressedTNTPrimed(World worldIn, double x, double y, double z, EntityLivingBase igniter,
 			double explosionSize, int dropDenom) {
@@ -57,28 +59,40 @@ final class EntityCompressedTNTPrimed extends EntityTNTPrimed {
 			motionY *= -0.5D;
 		}
 
-		if (--fuse <= 0) {
-			setDead();
+		if (--fuse == 0) {
 			if (!world.isRemote) {
-				int stopX = (int) (posX + explSize), stopY = (int) Math.min(posY + explSize, 255),
-						stopZ = (int) (posZ + explSize);
-				for (int x = (int) (posX - explSize); x < stopX; x++)
-					for (int y = (int) Math.max(posY - explSize, 1); y < stopY; y++)
-						for (int z = (int) (posZ - explSize); z < stopZ; z++) {
-							BlockPos bp = new BlockPos(x, y, z);
-							if (!world.getBlockState(bp).getBlock().equals(Blocks.AIR)
-									&& world.rand.nextInt(dropD) == 0)
-								world.destroyBlock(bp, true);
-							else
-								world.setBlockState(bp, Blocks.AIR.getDefaultState());
-						}
+				stopX = (int) (posX + explSize);
+				startY = (int) Math.max(posY - explSize, 1);
+				stopY = (int) Math.min(posY + explSize, 255);
+				startZ = (int) (posZ - explSize);
+				stopZ = (int) (posZ + explSize);
 				world.playSound((EntityPlayer) null, posX, posY, posZ, SoundEvents.ENTITY_GENERIC_EXPLODE,
 						SoundCategory.BLOCKS, 4.0F,
 						(1.0F + (this.world.rand.nextFloat() - world.rand.nextFloat()) * 0.2F) * 0.7F);
+				startX = (int) (posX - explSize);
 			}
-		} else {
+		} else if (fuse > 0) {
 			handleWaterMovement();
 			world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, posX, posY + 0.5D, posZ, 0.0D, 0.0D, 0.0D);
+		} else {
+			int explX = startX - fuse;
+			for (byte i = 0; i < 8 && explX <= stopX; i++) {
+				explX = startX - fuse--;
+				for (int y = startY; y < stopY; y++)
+					for (int z = startZ; z < stopZ; z++) {
+						BlockPos bp = new BlockPos(explX, y, z);
+						if (!world.getBlockState(bp).equals(AIR_STATE))
+							if (world.rand.nextInt(dropD) == 0) {
+								IBlockState state = world.getBlockState(bp);
+								state.getBlock().dropBlockAsItem(world, bp, state, 0);
+								world.setBlockState(bp, AIR_STATE);
+							} else
+								world.setBlockState(bp, AIR_STATE);
+					}
+			}
+			fuse++;
+			if (explX >= stopX)
+				setDead();
 		}
 	}
 
