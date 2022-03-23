@@ -3,7 +3,7 @@
   "modid": "compressedtnt",
   "name": "Compressed TNT",
   "description": "Adds better TNT",
-  "version":"1.0",
+  "version":"a1.1",
   "mcversion": "${mcversion}",
   "authorList": ["DialupKing"]
 }
