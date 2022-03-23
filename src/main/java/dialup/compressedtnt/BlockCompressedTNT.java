@@ -20,11 +20,23 @@ import net.minecraft.world.World;
 
 public final class BlockCompressedTNT extends BlockTNT {
 
-	public BlockCompressedTNT() {
+	public static final String[] TUPLES = { "", "double", "triple", "quadruple", "quintuple", "sextuple", "septuple",
+			"octuple", "nonuple", "decuple", "undecuple", "duodecuple", "tredecuple", "quattuordecuple", "quindecuple",
+			"sexdecuple", "septendecuple", "octodecuple", "novemdecuple", "vigintuple", "unvigintuple", "duovigintuple",
+			"trevigintuple", "quattuorvigintuple", "quinvigintuple", "sexvigintuple", "septenvigintuple",
+			"octovigintuple", "novemvigintuple", "trigintuple", "untrigintuple", "duotrigintuple" };
+
+	private final double explSize;
+	private final int dropDenom;
+
+	public BlockCompressedTNT(int level) {
 		super();
-		setUnlocalizedName("compressedtnt");
-		setRegistryName("compressedtnt");
+		String id = TUPLES[level] + "compressedtnt";
+		setUnlocalizedName(id);
+		setRegistryName(id);
 		setCreativeTab(CommonProxy.CREATIVE_TAB);
+		dropDenom = 4 * level + 1;
+		explSize = 4 * (level + 1);
 	}
 
 	@Override
@@ -32,7 +44,7 @@ public final class BlockCompressedTNT extends BlockTNT {
 		if (!worldIn.isRemote) {
 			EntityCompressedTNTPrimed entitytntprimed = new EntityCompressedTNTPrimed(worldIn,
 					(double) ((float) pos.getX() + 0.5F), (double) pos.getY(), (double) ((float) pos.getZ() + 0.5F),
-					explosionIn.getExplosivePlacedBy());
+					explosionIn.getExplosivePlacedBy(), explSize, dropDenom);
 			entitytntprimed.setFuse(
 					(short) (worldIn.rand.nextInt(entitytntprimed.getFuse() / 4) + entitytntprimed.getFuse() / 8));
 			worldIn.spawnEntity(entitytntprimed);
@@ -41,7 +53,7 @@ public final class BlockCompressedTNT extends BlockTNT {
 
 	@Override
 	public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state) {
-		this.explode(worldIn, pos, state, (EntityLivingBase) null);
+		explode(worldIn, pos, state, (EntityLivingBase) null);
 	}
 
 	@Override
@@ -50,7 +62,7 @@ public final class BlockCompressedTNT extends BlockTNT {
 			if (((Boolean) state.getValue(EXPLODE)).booleanValue()) {
 				EntityCompressedTNTPrimed entitytntprimed = new EntityCompressedTNTPrimed(worldIn,
 						(double) ((float) pos.getX() + 0.5F), (double) pos.getY(), (double) ((float) pos.getZ() + 0.5F),
-						igniter);
+						igniter, explSize, dropDenom);
 				worldIn.spawnEntity(entitytntprimed);
 				worldIn.playSound((EntityPlayer) null, entitytntprimed.posX, entitytntprimed.posY, entitytntprimed.posZ,
 						SoundEvents.ENTITY_TNT_PRIMED, SoundCategory.BLOCKS, 1.0F, 1.0F);
@@ -65,7 +77,7 @@ public final class BlockCompressedTNT extends BlockTNT {
 
 		if (!itemstack.isEmpty()
 				&& (itemstack.getItem() == Items.FLINT_AND_STEEL || itemstack.getItem() == Items.FIRE_CHARGE)) {
-			this.explode(worldIn, pos, state.withProperty(EXPLODE, Boolean.valueOf(true)), playerIn);
+			explode(worldIn, pos, state.withProperty(EXPLODE, Boolean.valueOf(true)), playerIn);
 			worldIn.setBlockState(pos, Blocks.AIR.getDefaultState(), 11);
 
 			if (itemstack.getItem() == Items.FLINT_AND_STEEL) {
@@ -86,7 +98,7 @@ public final class BlockCompressedTNT extends BlockTNT {
 			EntityArrow entityarrow = (EntityArrow) entityIn;
 
 			if (entityarrow.isBurning()) {
-				this.explode(worldIn, pos, worldIn.getBlockState(pos).withProperty(EXPLODE, Boolean.valueOf(true)),
+				explode(worldIn, pos, worldIn.getBlockState(pos).withProperty(EXPLODE, Boolean.valueOf(true)),
 						entityarrow.shootingEntity instanceof EntityLivingBase
 								? (EntityLivingBase) entityarrow.shootingEntity
 								: null);

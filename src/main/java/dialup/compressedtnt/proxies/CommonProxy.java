@@ -20,17 +20,23 @@ public class CommonProxy {
 		}
 	};
 
-	private static final BlockCompressedTNT block = new BlockCompressedTNT();
-	protected static final Item item = new ItemBlock(block).setRegistryName(block.getRegistryName())
-			.setCreativeTab(CREATIVE_TAB);
+	private static final BlockCompressedTNT[] BLOCKS = new BlockCompressedTNT[BlockCompressedTNT.TUPLES.length];
+	protected static final Item[] ITEMS = new ItemBlock[BLOCKS.length];
+	static {
+		for (byte i = 0; i < BLOCKS.length; i++) {
+			BLOCKS[i] = new BlockCompressedTNT(i);
+			ITEMS[i] = new ItemBlock(BLOCKS[i]).setRegistryName(BLOCKS[i].getRegistryName())
+					.setCreativeTab(CREATIVE_TAB);
+		}
+	}
 
 	@SubscribeEvent
 	public final void registerBlocks(RegistryEvent.Register<Block> ev) {
-		ev.getRegistry().register(block);
+		ev.getRegistry().registerAll(BLOCKS);
 	}
 
 	@SubscribeEvent
 	public final void registerItems(RegistryEvent.Register<Item> ev) {
-		ev.getRegistry().register(item);
+		ev.getRegistry().registerAll(ITEMS);
 	}
 }
