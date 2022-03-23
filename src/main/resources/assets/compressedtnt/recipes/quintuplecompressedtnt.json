@@ -1,0 +1,14 @@
+{
+  "type" : "minecraft:crafting_shaped",
+  "pattern" : [ "AAA", "AAA", "AAA" ],
+  "key" : {
+    "A" : [ {
+      "item" : "compressedtnt:quadruplecompressedtnt",
+      "data" : 0
+    } ]
+  },
+  "result" : {
+    "item" : "compressedtnt:quintuplecompressedtnt",
+    "data" : 0
+  }
+}
